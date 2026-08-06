@@ -22,33 +22,35 @@ AWSの静的ホスティングおよびサーバレスアーキテクチャを�
 
 ## システムアーキテクチャ
 
-```text
-[ エンドユーザー / ブラウザ ]
-         │
-         │ ① HTTPSリクエスト（独自ドメイン）
-         ▼
-  [ Amazon Route 53 ]
-         │
-         │ (DNSルーティング & SSL/TLS証明書検証)
-         ▼
-[ AWS Certificate Manager (ACM) ]
-         │
-         ▼
- [ Amazon CloudFront (CDN) ] ─── (OAC: Origin Access Control) ───► [ Amazon S3 ]
-         │                                                            (静的コンテンツ格納)
-         │
-         │ ② お問い合わせ送信（/api/contact POST）
-         ▼
-[ Amazon API Gateway (REST API) ]
-         │
-         │ ③ リクエスト処理・バリデーション
-         ▼
-    [ AWS Lambda ]
-         │
-         │ ④ メール送信リクエスト
-         ▼
-   [ Amazon SES ] ─────────► [ 管理者メールアドレス ]
+```mermaid
+flowchart TD
+    User(["👤 エンドユーザー / ブラウザ"])
+    Route53["🌐 Amazon Route 53"]
+    ACM["🔒 AWS Certificate Manager"]
+    CloudFront["⚡ Amazon CloudFront"]
+    S3[("🪣 Amazon S3")]
+    APIGW["🚪 Amazon API Gateway"]
+    Lambda["⚡ AWS Lambda"]
+    SES["✉️ Amazon SES"]
+    Admin["👨‍💻 管理者 (メール受信)"]
 
+    User -->|① HTTPSリクエスト| Route53
+    Route53 -.->|ドメイン検証| ACM
+    Route53 --> CloudFront
+    CloudFront -->|OACアクセス| S3
+    
+    User -->|② フォーム送信| APIGW
+    APIGW -->|③ リクエスト実行| Lambda
+    Lambda -->|④ メール送信依頼| SES
+    SES -->|⑤ 問い合わせ通知| Admin
+
+    %% ▼ 全ての接続線（矢印）を白色にする設定 ▼
+    linkStyle default stroke:#fff,stroke-width:2px;
+    
+    %% ノードの色も少し明るめに調整（お好みで）
+    style S3 fill:#1E3A8A,stroke:#38BDF8,stroke-width:2px,color:#fff
+    style CloudFront fill:#78350F,stroke:#FBBF24,stroke-width:2px,color:#fff
+    style Lambda fill:#7C2D12,stroke:#FB923C,stroke-width:2px,color:#fff
 ```
 
 ### コンポーネント役割と構成のポイント
