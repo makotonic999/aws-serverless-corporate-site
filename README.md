@@ -21,3 +21,49 @@ AWSの静的ホスティングおよびサーバレスアーキテクチャを�
 ---
 
 ## システムアーキテクチャ
+
+```text
+[ エンドユーザー / ブラウザ ]
+         │
+         │ ① HTTPSリクエスト（独自ドメイン）
+         ▼
+  [ Amazon Route 53 ]
+         │
+         │ (DNSルーティング & SSL/TLS証明書検証)
+         ▼
+[ AWS Certificate Manager (ACM) ]
+         │
+         ▼
+ [ Amazon CloudFront (CDN) ] ─── (OAC: Origin Access Control) ───► [ Amazon S3 ]
+         │                                                            (静的コンテンツ格納)
+         │
+         │ ② お問い合わせ送信（/api/contact POST）
+         ▼
+[ Amazon API Gateway (REST API) ]
+         │
+         │ ③ リクエスト処理・バリデーション
+         ▼
+    [ AWS Lambda ]
+         │
+         │ ④ メール送信リクエスト
+         ▼
+   [ Amazon SES ] ─────────► [ 管理者メールアドレス ]
+
+```
+
+### コンポーネント役割と構成のポイント
+
+* **静的コンテンツ配信層（S3 + CloudFront）**
+* S3バケットはパブリックアクセスを完全遮断し、CloudFrontからのアクセスのみを **OAC（Origin Access Control）** で許可。
+* CloudFront（CDN）で世界中のエッジサーバーにキャッシュさせることで、表示速度の爆速化とS3転送量の削減を両立。
+
+
+* **ドメイン・SSL/TLSセキュリティ層（Route 53 + ACM）**
+* Route 53 で独自ドメインのDNS設定を管理。
+* ACM（AWS Certificate Manager）で無料発行・自動更新されるSSL/TLS証明書を適用し、サイト全体を完全HTTPS化。
+
+
+* **完全サーバレスなお問い合わせAPI（API Gateway + Lambda + SES）**
+* フォームからの送信リクエストを API Gateway で受領し、CORS制御およびパラメータバリデーションを実施。
+* Lambda 関数が起動してロジックを処理し、Amazon SES を介して管理者へメールを自動通知。
+* サーバーの常時稼働が不要なため、実行時間（数秒）に応じた極めて低い従量課金コストで運用。
