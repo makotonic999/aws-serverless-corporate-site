@@ -18,7 +18,7 @@
 			<div id="page-wrapper">
 
 				<!-- Header -->
-					<header id="header" class="alt">
+					<header id="header">
 						<h1><a href="index.html">岡田築炉工業所</a></h1>
 						<nav>
 							<a href="#menu">Menu</a>
@@ -31,10 +31,8 @@
 							<h2>Menu</h2>
 							<ul class="links">
 								<li><a href="index.html">Home</a></li>
-								<li><a href="generic.html">Generic</a></li>
-								<li><a href="elements.html">Elements</a></li>
-								<li><a href="#">Log In</a></li>
-								<li><a href="#">Sign Up</a></li>
+								<li><a href="architecture.html">システム構成（AWS/IaC）</a></li>
+								<li><a href="#footer">お問い合わせ</a></li>
 							</ul>
 							<a href="#" class="close">Close</a>
 						</div>
@@ -83,7 +81,7 @@
 									<div class="content">
 										<h2 class="major">安さの根拠</h2>
 										<p>決して安請負をしているわけではありません。確かなAWSの知見から、月々数百円でのホームページ運用を実現しています。</p>
-										<a href="#" class="special">Learn more</a>
+										<a href="architecture.html" class="special">技術構成を見る</a>
 									</div>
 								</div>
 							</section>
@@ -127,53 +125,47 @@
 
 					</section>
 
-				<!-- Footer -->
-					<section id="footer">
-						<div class="inner">
-							<h2 class="major">お仕事のご依頼・ご相談はこちら</h2>
-							<p>どなたでもお気軽にお問い合わせください。</p>
-							<form method="post" action="#">
-								<div class="fields">
-									<div class="field">
-										<label for="name">Name</label>
-										<input type="text" name="name" id="name" />
-									</div>
-									<div class="field">
-										<label for="email">Email</label>
-										<input type="email" name="email" id="email" />
-									</div>
-									<div class="field">
-										<label for="message">Message</label>
-										<textarea name="message" id="message" rows="4"></textarea>
-									</div>
-								</div>
-								<ul class="actions">
-									<li><input type="submit" value="Send Message" /></li>
-								</ul>
-							</form>
-							<ul class="contact">
-								<li class="icon solid fa-home">
-									岡田築炉工業所<br />
-									東京都 世田谷区 上北沢<br />									
-								</li>
-								<li class="icon solid fa-phone">(000) 000-0000</li>
-								<li class="icon solid fa-envelope"><a href="#">information@untitled.tld</a></li>
-							</ul>
-							<ul class="copyright">
-								<li>&copy; Untitled Inc. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-							</ul>
-						</div>
-					</section>
+<!-- Footer -->
+<section id="footer">
+    <div class="inner">
+        <h2 class="major">お仕事のご依頼・ご相談はこちら</h2>
+        <p>どなたでもお気軽にお問い合わせください。</p>
+        
+        <!-- id="contact-form" を付与し、JavaScript から制御可能に -->
+        <form id="contact-form">
+            <div class="fields">
+                <div class="field">
+                    <label for="name">お名前 <span style="color: #ff6b6b;">*</span></label>
+                    <input type="text" name="name" id="name" required placeholder="例：山田 太郎" />
+                </div>
+                <div class="field">
+                    <label for="email">メールアドレス <span style="color: #ff6b6b;">*</span></label>
+                    <input type="email" name="email" id="email" required placeholder="例：example@domain.com" />
+                </div>
+                <div class="field">
+                    <label for="message">お問い合わせ内容 <span style="color: #ff6b6b;">*</span></label>
+                    <textarea name="message" id="message" rows="4" required placeholder="ご相談内容をご記入ください"></textarea>
+                </div>
+            </div>
+            
+            <ul class="actions">
+                <li><input type="submit" id="submit-btn" value="送信する" /></li>
+            </ul>
 
-			</div>
+            <!-- 送信結果（成功/失敗メッセージ）を表示するエリア -->
+            <div id="form-response" style="margin-top: 1.5em; display: none; padding: 1em; border-radius: 4px;"></div>
+        </form>
 
-		<!-- Scripts -->
-			<script src="js/jquery.min.js"></script>
-			<script src="js/jquery.scrollex.min.js"></script>
-			<script src="js/browser.min.js"></script>
-			<script src="js/breakpoints.min.js"></script>
-			<script src="js/util.js"></script>
-			<script src="js/main.js"></script>
-
-	</body>
-</html>
+        <ul class="contact">
+            <li class="icon solid fa-home">
+                岡田築炉工業所<br />
+                東京都 世田谷区 上北沢<br />
+            </li>
+            <li class="icon solid fa-phone">(000) 000-0000</li>
+            <li class="icon solid fa-envelope"><a href="#">information@untitled.tld</a></li>
+        </ul>
+        <ul class="copyright">
+            <li>&copy; 岡田築炉工業所 All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+        </ul>
+    </div>
+</section>
