@@ -124,7 +124,7 @@
 							</section>
 
 					</section>
-
+					
 				<!-- Footer -->
 					<section id="footer">
 						<div class="inner">
@@ -170,13 +170,62 @@
 
 			</div>
 
-		<!-- Scripts (ここが欠落していたため表示が崩れていました) -->
+<!-- Scripts -->
 			<script src="js/jquery.min.js"></script>
 			<script src="js/jquery.scrollex.min.js"></script>
 			<script src="js/browser.min.js"></script>
 			<script src="js/breakpoints.min.js"></script>
 			<script src="js/util.js"></script>
 			<script src="js/main.js"></script>
+
+			<!-- ▼ ここから追加：お問い合わせフォーム送信処理 ▼ -->
+			<script>
+				document.getElementById('contact-form').addEventListener('submit', async function(e) {
+					e.preventDefault(); // 画面リロードを防止
+
+					const submitBtn = document.getElementById('submit-btn');
+					const responseDiv = document.getElementById('form-response');
+					
+					// ボタンを送信不可（処理中）にする
+					submitBtn.disabled = true;
+					submitBtn.value = '送信中...';
+					responseDiv.style.display = 'none';
+
+					// フォームデータの取得
+					const formData = {
+						name: document.getElementById('name').value,
+						email: document.getElementById('email').value,
+						message: document.getElementById('message').value
+					};
+
+					try {
+						// ★現時点ではバックエンド(API)がないため、ダミーの擬似レスポンス（1.5秒待ち）にします
+						// バックエンドAPI完成後にここを `await fetch('API_ENDPOINT_URL', ...)` に差し替えます！
+						await new Promise(resolve => setTimeout(resolve, 1500));
+
+						// 成功時の処理
+						responseDiv.style.display = 'block';
+						responseDiv.style.backgroundColor = '#28a745';
+						responseDiv.style.color = '#ffffff';
+						responseDiv.innerText = 'お問い合わせを送信しました。ご返信まで今しばらくお待ちください。';
+						
+						// フォームのリセット
+						document.getElementById('contact-form').reset();
+
+					} catch (error) {
+						// エラー時の処理
+						responseDiv.style.display = 'block';
+						responseDiv.style.backgroundColor = '#dc3545';
+						responseDiv.style.color = '#ffffff';
+						responseDiv.innerText = '送信に失敗しました。時間をおいて再度お試しください。';
+					} finally {
+						// ボタンを元に戻す
+						submitBtn.disabled = false;
+						submitBtn.value = '送信する';
+					}
+				});
+			</script>
+			<!-- ▲ ここまで追加 ▲ -->
 
 	</body>
 </html>
