@@ -166,3 +166,136 @@ resource "aws_route53_record" "www" {
     evaluate_target_health = false
   }
 }
+
+# ==================================================
+# 10. SES (送信元・送信先メールアドレスの検証)
+# ==================================================
+resource "aws_ses_email_identity" "contact_email" {
+  email = "makotonic999@gmail.com"
+}
+
+# ==================================================
+# 11. IAM Role & Policy (Lambda実行用ロール)
+# ==================================================
+resource "aws_iam_role" "lambda_exec_role" {
+  name = "contact_form_lambda_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# CloudWatch Logs ログ出力権限
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# SES メール送信権限
+resource "aws_iam_policy" "lambda_ses_policy" {
+  name        = "contact_form_ses_policy"
+  description = "Allow Lambda to send email via SES"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["ses:SendEmail", "ses:SendRawEmail"]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_ses_attach" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.lambda_ses_policy.arn
+}
+
+# ==================================================
+# 12. Lambda 用 ZIP アーカイブの作成
+# ==================================================
+# ※プロジェクトルートからの相対パスで指定（環境に合わせて調整）
+data "archive_file" "lambda_zip" {
+  type        = "zip"
+  source_file = "${path.module}/src/lambda_function.py"
+  output_path = "${path.module}/lambda_function.zip"
+}
+
+# ==================================================
+# 13. Lambda 関数
+# ==================================================
+resource "aws_lambda_function" "contact_form" {
+  filename         = data.archive_file.lambda_zip.output_path
+  function_name    = "contact-form-handler"
+  role             = aws_iam_role.lambda_exec_role.arn
+  handler          = "lambda_function.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  runtime          = "python3.12"
+
+  environment {
+    variables = {
+      SENDER_EMAIL    = "makotonic999@gmail.com"
+      RECIPIENT_EMAIL = "makotonic999@gmail.com"
+    }
+  }
+}
+
+# ==================================================
+# 14. API Gateway (HTTP API) & CORS
+# ==================================================
+resource "aws_apigatewayv2_api" "http_api" {
+  name          = "contact-form-api"
+  protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_headers = ["content-type"]
+    allow_methods = ["POST", "OPTIONS"]
+    allow_origins = ["*"]
+  }
+}
+
+resource "aws_apigatewayv2_stage" "default" {
+  api_id      = aws_apigatewayv2_api.http_api.id
+  name        = "$default"
+  auto_deploy = true
+}
+
+resource "aws_apigatewayv2_integration" "lambda_integration" {
+  api_id           = aws_apigatewayv2_api.http_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.contact_form.invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "post_contact" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "POST /contact"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+}
+
+# API Gateway から Lambda を呼び出す許可
+resource "aws_lambda_permission" "api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.contact_form.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
+}
+
+# ==================================================
+# 15. Outputs (完成した API エンドポイントを表示)
+# ==================================================
+output "api_endpoint" {
+  value       = "${aws_apigatewayv2_stage.default.invoke_url}contact"
+  description = "Contact Form API Endpoint URL"
+}
