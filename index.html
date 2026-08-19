@@ -178,7 +178,7 @@
 			<script src="js/util.js"></script>
 			<script src="js/main.js"></script>
 
-			<!-- ▼ ここから追加：お問い合わせフォーム送信処理 ▼ -->
+			<!-- ▼ お問い合わせフォーム送信処理 ▼ -->
 			<script>
 				document.getElementById('contact-form').addEventListener('submit', async function(e) {
 					e.preventDefault(); // 画面リロードを防止
@@ -199,9 +199,18 @@
 					};
 
 					try {
-						// ★現時点ではバックエンド(API)がないため、ダミーの擬似レスポンス（1.5秒待ち）にします
-						// バックエンドAPI完成後にここを `await fetch('API_ENDPOINT_URL', ...)` に差し替えます！
-						await new Promise(resolve => setTimeout(resolve, 1500));
+						// 本番 API Gateway エンドポイントへデータ送信
+						const res = await fetch('https://rcmlkz59ib.execute-api.ap-northeast-1.amazonaws.com/contact', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify(formData)
+						});
+
+						if (!res.ok) {
+							throw new Error('API Error');
+						}
 
 						// 成功時の処理
 						responseDiv.style.display = 'block';
@@ -225,7 +234,6 @@
 					}
 				});
 			</script>
-			<!-- ▲ ここまで追加 ▲ -->
-
+			<!-- ▲ ここまで ▲ -->
 	</body>
 </html>
