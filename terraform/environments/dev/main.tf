@@ -7,6 +7,7 @@ resource "random_string" "bucket_suffix" {
 
 # 1. Route 53 ホストゾーンの参照（既存のホストゾーン情報を取得）
 data "aws_route53_zone" "main" {
+  provider     = aws.management
   name         = var.domain_name
   private_zone = false
 }
@@ -25,6 +26,7 @@ resource "aws_acm_certificate" "cert" {
 
 # 3. ACM DNS 検証用レコードを Route 53 に自動作成
 resource "aws_route53_record" "cert_validation" {
+  provider = aws.management
   for_each = {
     for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
@@ -125,8 +127,8 @@ resource "aws_s3_bucket_policy" "site" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "AllowCloudFrontServicePrincipalReadOnly"
-        Effect    = "Allow"
+        Sid    = "AllowCloudFrontServicePrincipalReadOnly"
+        Effect = "Allow"
         Principal = {
           Service = "cloudfront.amazonaws.com"
         }
@@ -144,9 +146,10 @@ resource "aws_s3_bucket_policy" "site" {
 
 # 9. Route 53 DNS エイリアスレコード作成（ドメイン -> CloudFront）
 resource "aws_route53_record" "root" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = var.domain_name
-  type    = "A"
+  provider = aws.management
+  zone_id  = data.aws_route53_zone.main.zone_id
+  name     = var.domain_name
+  type     = "A"
 
   alias {
     name                   = aws_cloudfront_distribution.site.domain_name
@@ -156,9 +159,10 @@ resource "aws_route53_record" "root" {
 }
 
 resource "aws_route53_record" "www" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = "www.${var.domain_name}"
-  type    = "A"
+  provider = aws.management
+  zone_id  = data.aws_route53_zone.main.zone_id
+  name     = "www.${var.domain_name}"
+  type     = "A"
 
   alias {
     name                   = aws_cloudfront_distribution.site.domain_name
@@ -228,7 +232,7 @@ resource "aws_iam_role_policy_attachment" "lambda_ses_attach" {
 # ※プロジェクトルートからの相対パスで指定（環境に合わせて調整）
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "${path.module}/src/lambda_function.py"
+  source_file = "${path.module}/../../../src/lambda_function.py"
   output_path = "${path.module}/lambda_function.zip"
 }
 
