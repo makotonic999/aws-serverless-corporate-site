@@ -1,8 +1,11 @@
 # 1. GitHub の OIDC プロバイダーを AWS に登録
-resource "aws_iam_openid_connect_provider" "github" {
+resource "aws_iam_openid_connect_provider" "github" { # あるいは既存の resource "aws_iam_openid_connect_provider" "github"
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"] # GitHub OIDC の標準サムプリント
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1",
+    "7ec47df6f56e6d1c97a5b3a86c673e4497bece69" # 最新の予備サムプリントを含める
+  ]
 }
 
 # 2. GitHub Actions が引き受ける IAM ロール
@@ -23,7 +26,10 @@ resource "aws_iam_role" "github_actions_deploy" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:makotonic999/aws-serverless-corporate-site:*"
+            "token.actions.githubusercontent.com:sub" = [
+              "repo:makotonic999/aws-serverless-corporate-site:ref:refs/heads/*",
+              "repo:makotonic999/aws-serverless-corporate-site:pull_request"
+            ]
           }
         }
       }
