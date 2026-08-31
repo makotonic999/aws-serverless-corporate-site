@@ -27,8 +27,7 @@ resource "aws_iam_role" "github_actions_deploy" {
           }
           StringLike = {
             "token.actions.githubusercontent.com:sub" = [
-              "repo:makotonic999/aws-serverless-corporate-site:ref:refs/heads/*",
-              "repo:makotonic999/aws-serverless-corporate-site:pull_request"
+              "repo:makotonic999/aws-serverless-corporate-site:*"
             ]
           }
         }
