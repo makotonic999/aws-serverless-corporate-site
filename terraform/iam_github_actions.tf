@@ -1,4 +1,4 @@
-# 1. GitHub の OIDC プロバイダーを AWS に登録（すでに存在する場合はエラーになることがあるため、必要に応じてインポート等）
+# 1. GitHub の OIDC プロバイダーを AWS に登録
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
@@ -57,7 +57,7 @@ resource "aws_iam_role_policy" "deploy_policy" {
         Action = [
           "cloudfront:CreateInvalidation"
         ]
-        Resource = "*" # 特定のCloudFrontディストリビューションARNに絞ることも可能
+        Resource = "*"
       }
     ]
   })
