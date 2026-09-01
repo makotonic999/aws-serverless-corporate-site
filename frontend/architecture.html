@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>技術構成・システムアーキテクチャ | 岡田築炉工業所</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="css/main.css" />
+		<noscript><link rel="stylesheet" href="css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">岡田築炉工業所</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="architecture.html">システム構成</a></li>
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>システムアーキテクチャ</h2>
+								<p>本Webサイトを支えるサーバーレスインフラとIaC（Terraform）の取り組み</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<h3 class="major">インフラ構成図</h3>
+									<p>本サイトは、高パフォーマンス・高セキュリティ・低コストを実現するために、AWSのサーバーレスアーキテクチャを採用しています。</p>
+
+<pre><code>[ ユーザー (ブラウザ) ]
+       │
+       ▼ (HTTPS / CDN)
+[ CloudFront ]
+       │
+       ├─► [ S3 ] (静的コンテンツホスティング)
+       │
+       └─► [ API Gateway ] ──► [ Lambda ] ──► [ SES ] (メール送信)
+                                   ▲
+                                   └─ (すべて Terraform で管理)</code></pre>
+
+									<h3 class="major" style="margin-top: 2em;">採用リソースと選定理由</h3>
+									
+									<h4>1. Amazon S3 & CloudFront</h4>
+									<p>静的ファイル（HTML/CSS/JS）をS3で保持し、CloudFrontを通じて世界中に高速配信しています。サーバーの管理が不要で、高い可用性とセキュリティを両立しています。</p>
+
+									<h4>2. API Gateway & AWS Lambda</h4>
+									<p>お問い合わせフォームのバックエンド処理には、完全サーバーレスな構成を採用。リクエストが発生した瞬間のみ実行されるため、24時間無駄なサーバーコストが発生しません。</p>
+
+									<h4>3. Amazon SES (Simple Email Service)</h4>
+									<p>フォームから送信されたお問い合わせを安全かつ確実に指定のメールアドレスへ通知・転送します。</p>
+
+									<h4>4. Terraform による IaC (Infrastructure as Code)</h4>
+									<p>すべてのインフラ構成をコード化して管理。構築手順の自動化、再現性の確保、バージョン管理を実現しています。</p>
+
+								</div>
+							</div>
+
+					</section>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="inner">
+							<ul class="copyright">
+								<li>&copy; 岡田築炉工業所 All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="js/jquery.min.js"></script>
+			<script src="js/jquery.scrollex.min.js"></script>
+			<script src="js/browser.min.js"></script>
+			<script src="js/breakpoints.min.js"></script>
+			<script src="js/util.js"></script>
+			<script src="js/main.js"></script>
+
+	</body>
+</html>
