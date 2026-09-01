@@ -34,3 +34,12 @@ resource "aws_dynamodb_table" "tf_locks" {
     type = "S"
   }
 }
+
+resource "aws_ecr_repository" "backend" {
+  name                 = "corporate-site-backend"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
