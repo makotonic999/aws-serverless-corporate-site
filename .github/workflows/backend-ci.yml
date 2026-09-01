@@ -2,7 +2,9 @@ name: Backend CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - feature/oidc-test
     paths:
       - 'backend/**'
   pull_request:
