@@ -14,10 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     
     # AWSへのアクセスにOIDC認証を使う場合のアクセス許可設定
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,9 +22,9 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::532970129307:role/GitHubActionsFrontendDeployRole
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-1
-          role-skip-session-tagging: true
 
       # S3への同期（frontend/ フォルダの中身をバケットのルートに同期）
       - name: Deploy to S3
