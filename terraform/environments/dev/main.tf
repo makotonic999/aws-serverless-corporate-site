@@ -232,7 +232,7 @@ resource "aws_iam_role_policy_attachment" "lambda_ses_attach" {
 # ※プロジェクトルートからの相対パスで指定（環境に合わせて調整）
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "${path.module}/../../../src/lambda_function.py"
+  source_file = "${path.module}/../../../backend/src/lambda_function.py"
   output_path = "${path.module}/lambda_function.zip"
 }
 
