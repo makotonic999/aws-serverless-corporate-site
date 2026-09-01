@@ -8,7 +8,7 @@ import (
 func main() {
 	// "/hello" というURLにアクセスが来たときの処理を定義
 	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, Go Backend for Corporate Site!")
+		fmt.Fprintf(w, "Hello, Go Backend for Corporate Site! (CI/CD Test)")
 	})
 
 	// ポート番号 8080 でサーバーを起動
