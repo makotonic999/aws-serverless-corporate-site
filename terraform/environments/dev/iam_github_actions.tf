@@ -72,7 +72,7 @@ resource "aws_iam_role" "github_actions_deploy" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:makotonic999/aws-serverless-corporate-site:*"
+            "token.actions.githubusercontent.com:sub" = "repo:makotonic999/aws-serverless-corporate-site:ref:refs/heads/feature/oidc-test"
           }
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
