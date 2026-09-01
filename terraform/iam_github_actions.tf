@@ -8,9 +8,9 @@ resource "aws_iam_openid_connect_provider" "github" { # あるいは既存の re
   ]
 }
 
-# 2. GitHub Actions が引き受ける IAM ロール
-resource "aws_iam_role" "github_actions_deploy" {
-  name = "GitHubActionsFrontendDeployRole"
+# 4. バックエンド（CI/CD）が引き受ける専用の IAM ロール
+resource "aws_iam_role" "github_actions_backend_deploy" {
+  name = "GitHubActionsBackendDeployRole"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -32,6 +32,37 @@ resource "aws_iam_role" "github_actions_deploy" {
       }
     ]
   })
+}
+
+# 5. バックエンド用ロールにアタッチするインラインポリシー（ECR操作権限など）
+resource "aws_iam_role_policy" "backend_deploy_policy" {
+  name = "BackendDeployPolicy"
+  role = aws_iam_role.github_actions_backend_deploy.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:CompleteLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:DescribeRepositories",
+          "ecr:ListImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# 6. バックエンド用ロールの ARN を出力しておくと便利
+output "github_actions_backend_role_arn" {
+  value = aws_iam_role.github_actions_backend_deploy.arn
 }
 
 # 3. S3同期およびCloudFrontインバリデーション用のインラインポリシー

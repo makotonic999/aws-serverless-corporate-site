@@ -37,7 +37,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::532970129307:role/GitHubActionsFrontendDeployRole # 必要に応じてバックエンド用のロールに切り替えも可能
+          role-to-assume: arn:aws:iam::532970129307:role/GitHubActionsBackendDeployRole # terraform output の値に合わせる
           aws-region: ap-northeast-1
 
       - name: Login to Amazon ECR
