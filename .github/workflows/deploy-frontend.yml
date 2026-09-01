@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - main
+      - feature/oidc-test
     paths:
-      - 'index.html'
-      - 'css/**'
-      - 'js/**'
-      - 'images/**'
+      - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
 
 jobs:
@@ -16,10 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     
     # AWSへのアクセスにOIDC認証を使う場合のアクセス許可設定
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,19 +22,14 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::532970129307:role/GitHubActionsFrontendDeployRole
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-1
-          role-skip-session-tagging: true
 
-      # S3への同期
+      # S3への同期（frontend/ フォルダの中身をバケットのルートに同期）
       - name: Deploy to S3
         run: |
-          aws s3 sync . s3://okada-chikuro-site-hmd17889 \
-            --exclude ".git/*" \
-            --exclude ".github/*" \
-            --exclude "backend/*" \
-            --exclude "k8s/*" \
-            --exclude "terraform/*"
+          aws s3 sync frontend/ s3://okada-chikuro-site-hmd17889
 
       # CloudFrontのキャッシュ削除（インバリデーション）
       - name: Invalidate CloudFront Cache

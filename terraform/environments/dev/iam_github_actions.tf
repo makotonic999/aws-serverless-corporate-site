@@ -1,9 +1,19 @@
-# ==========================================
-# 1. バックエンド用 IAM ロール
-# ==========================================
+# 1. GitHub OIDCプロバイダーの定義
+resource "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
+
+  client_id_list = [
+    "sts.amazonaws.com"
+  ]
+
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1"
+  ]
+}
+
+# 2. バックエンド用 IAM ロール
 resource "aws_iam_role" "github_actions_backend_deploy" {
   name = "GitHubActionsBackendDeployRole"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

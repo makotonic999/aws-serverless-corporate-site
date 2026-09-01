@@ -1,14 +1,16 @@
 # 1. GitHub の OIDC プロバイダーを AWS に登録
-resource "aws_iam_openid_connect_provider" "github" { # あるいは既存の resource "aws_iam_openid_connect_provider" "github"
+resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [
     "6938fd4d98bab03faadb97b34396831e3780aea1",
-    "7ec47df6f56e6d1c97a5b3a86c673e4497bece69" # 最新の予備サムプリントを含める
+    "7ec47df6f56e6d1c97a5b3a86c673e4497bece69"
   ]
 }
 
-# 4. バックエンド（CI/CD）が引き受ける専用の IAM ロール
+# ==========================================
+# 2. バックエンド用（検証用：Conditionを一時的に外した状態）
+# ==========================================
 resource "aws_iam_role" "github_actions_backend_deploy" {
   name = "GitHubActionsBackendDeployRole"
 
@@ -21,20 +23,12 @@ resource "aws_iam_role" "github_actions_backend_deploy" {
           Federated = aws_iam_openid_connect_provider.github.arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:makotonic999/aws-serverless-corporate-site:*"
-          }
-          StringEquals = {
-            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          }
-        }
+        # OIDC切り分けテストのためConditionは外しています
       }
     ]
   })
 }
 
-# 5. バックエンド用ロールにアタッチするインラインポリシー（ECR操作権限など）
 resource "aws_iam_role_policy" "backend_deploy_policy" {
   name = "BackendDeployPolicy"
   role = aws_iam_role.github_actions_backend_deploy.id
@@ -60,12 +54,38 @@ resource "aws_iam_role_policy" "backend_deploy_policy" {
   })
 }
 
-# 6. バックエンド用ロールの ARN を出力しておくと便利
 output "github_actions_backend_role_arn" {
   value = aws_iam_role.github_actions_backend_deploy.arn
 }
 
-# 3. S3同期およびCloudFrontインバリデーション用のインラインポリシー
+# ==========================================
+# 3. フロントエンド用
+# ==========================================
+resource "aws_iam_role" "github_actions_deploy" {
+  name = "GitHubActionsFrontendDeployRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.github.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringLike = {
+            "token.actions.githubusercontent.com:sub" = "repo:makotonic999/aws-serverless-corporate-site:*"
+          }
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy" "deploy_policy" {
   name = "FrontendDeployPolicy"
   role = aws_iam_role.github_actions_deploy.id
@@ -97,7 +117,6 @@ resource "aws_iam_role_policy" "deploy_policy" {
   })
 }
 
-# 4. ワークフローで指定するためにロールの ARN を出力しておく
 output "github_actions_role_arn" {
   value       = aws_iam_role.github_actions_deploy.arn
   description = "IAM Role ARN for GitHub Actions OIDC"
