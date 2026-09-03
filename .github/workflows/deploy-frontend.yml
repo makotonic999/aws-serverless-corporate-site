@@ -8,22 +8,23 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
-    # AWSへのアクセスにOIDC認証を使う場合のアクセス許可設定
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      # AWS認証（OIDC）
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_FRONTEND_ROLE_ARN }}
           aws-region: ap-northeast-1
 
       # S3への同期（frontend/ フォルダの中身をバケットのルートに同期）
