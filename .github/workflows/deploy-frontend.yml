@@ -16,11 +16,11 @@ jobs:
     # AWSへのアクセスにOIDC認証を使う場合のアクセス許可設定
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # AWS認証（OIDC）
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -28,12 +28,16 @@ jobs:
 
       # S3への同期（frontend/ フォルダの中身をバケットのルートに同期）
       - name: Deploy to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
         run: |
-          aws s3 sync frontend/ s3://okada-chikuro-site-hmd17889
+          aws s3 sync frontend/ s3://$S3_BUCKET
 
       # CloudFrontのキャッシュ削除（インバリデーション）
       - name: Invalidate CloudFront Cache
+        env:
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id E1IW3397JIPTO9 \
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
             --paths "/*"
