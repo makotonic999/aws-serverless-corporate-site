@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>技術構成・システムアーキテクチャ | 岡田築炉工業所</title>
+		<title>システム構成 | Okada Makoto Portfolio</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="css/main.css" />
@@ -19,7 +19,7 @@
 
 				<!-- Header -->
 					<header id="header">
-						<h1><a href="index.html">岡田築炉工業所</a></h1>
+						<h1><a href="index.html">Okada Makoto</a></h1>
 						<nav>
 							<a href="#menu">Menu</a>
 						</nav>
@@ -31,7 +31,8 @@
 							<h2>Menu</h2>
 							<ul class="links">
 								<li><a href="index.html">Home</a></li>
-								<li><a href="architecture.html">システム構成</a></li>
+								<li><a href="architecture.html">システム構成（AWS/IaC）</a></li>
+								<li><a href="index.html#footer">お問い合わせ</a></li>
 							</ul>
 							<a href="#" class="close">Close</a>
 						</div>
@@ -42,7 +43,7 @@
 						<header>
 							<div class="inner">
 								<h2>システムアーキテクチャ</h2>
-								<p>本Webサイトを支えるサーバーレスインフラとIaC（Terraform）の取り組み</p>
+								<p>このポートフォリオサイトを支えるAWSサーバーレス構成とIaCの取り組み</p>
 							</div>
 						</header>
 
@@ -50,33 +51,99 @@
 							<div class="wrapper">
 								<div class="inner">
 
-									<h3 class="major">インフラ構成図</h3>
-									<p>本サイトは、高パフォーマンス・高セキュリティ・低コストを実現するために、AWSのサーバーレスアーキテクチャを採用しています。</p>
+									<h3 class="major">構成概要</h3>
+									<p>
+										本サイトはレンタルサーバーや常時稼働インスタンスを一切使用せず、AWSのサーバーレス・マネージドサービスのみで構成しています。
+										<strong>年間コスト約1,500円</strong>での運用を実現しながら、高パフォーマンス・高セキュリティを両立しています。
+									</p>
 
 <pre><code>[ ユーザー (ブラウザ) ]
        │
-       ▼ (HTTPS / CDN)
-[ CloudFront ]
+       ▼ HTTPS
+[ Route 53 ] ──── [ ACM (SSL/TLS証明書) ]
        │
-       ├─► [ S3 ] (静的コンテンツホスティング)
+       ▼
+[ CloudFront (CDN・エッジキャッシュ) ]
        │
-       └─► [ API Gateway ] ──► [ Lambda ] ──► [ SES ] (メール送信)
-                                   ▲
-                                   └─ (すべて Terraform で管理)</code></pre>
+       ├─► [ S3 ] 静的コンテンツ配信 (OAC経由のみ許可)
+       │
+       └─► [ API Gateway (HTTP API) ]
+                   │
+                   ▼
+             [ Lambda (Python 3.12) ]
+                   │
+                   ▼
+             [ SES ] ──► 管理者へメール通知
 
-									<h3 class="major" style="margin-top: 2em;">採用リソースと選定理由</h3>
-									
-									<h4>1. Amazon S3 & CloudFront</h4>
-									<p>静的ファイル（HTML/CSS/JS）をS3で保持し、CloudFrontを通じて世界中に高速配信しています。サーバーの管理が不要で、高い可用性とセキュリティを両立しています。</p>
+[ GitHub Actions ]
+       ├─► S3同期 + CloudFrontキャッシュ削除 (フロントエンド)
+       └─► ECRへDockerイメージプッシュ (バックエンド)
 
-									<h4>2. API Gateway & AWS Lambda</h4>
-									<p>お問い合わせフォームのバックエンド処理には、完全サーバーレスな構成を採用。リクエストが発生した瞬間のみ実行されるため、24時間無駄なサーバーコストが発生しません。</p>
+すべてのリソースを Terraform (IaC) で管理</code></pre>
 
-									<h4>3. Amazon SES (Simple Email Service)</h4>
-									<p>フォームから送信されたお問い合わせを安全かつ確実に指定のメールアドレスへ通知・転送します。</p>
+									<h3 class="major" style="margin-top: 2em;">設計のポイント</h3>
 
-									<h4>4. Terraform による IaC (Infrastructure as Code)</h4>
-									<p>すべてのインフラ構成をコード化して管理。構築手順の自動化、再現性の確保、バージョン管理を実現しています。</p>
+									<h4>1. 静的配信層 ― S3 + CloudFront + OAC</h4>
+									<p>
+										S3バケットはパブリックアクセスを完全遮断し、CloudFrontからのアクセスのみをOAC（Origin Access Control）で許可する構成を採用。
+										CloudFrontのエッジキャッシュにより世界中から高速アクセスが可能で、S3への直接アクセスを排除することでセキュリティを強化しています。
+									</p>
+
+									<h4>2. ドメイン・SSL/TLS ― Route 53 + ACM（クロスアカウント構成）</h4>
+									<p>
+										Route 53のホストゾーンは別AWSアカウントで管理しており、Terraformの<code>assume_role</code>を使ったクロスアカウント構成でDNSレコードを自動作成しています。
+										ACM証明書はCloudFront要件に合わせus-east-1で発行し、DNS検証も自動化しています。
+									</p>
+
+									<h4>3. サーバーレスAPI ― API Gateway + Lambda + SES</h4>
+									<p>
+										お問い合わせフォームのバックエンドはAPI Gateway（HTTP API）+ Lambda（Python 3.12）+ SESで構成。
+										サーバーの常時稼働が不要なため、リクエスト発生時のみ課金される極めて低コストな運用を実現しています。
+										CORS設定はAPI Gateway側で一元管理しています。
+									</p>
+
+									<h4>4. IaC ― Terraform（マルチプロバイダ・リモートステート）</h4>
+									<p>
+										全リソース（S3・CloudFront・Route 53・ACM・API Gateway・Lambda・SES・IAM・ECR・DynamoDB）をTerraformで定義。
+										ステートファイルはS3に保存し、DynamoDBによる排他ロックでチーム開発にも対応できる構成にしています。
+										PITRも有効化しステートの保護を徹底しています。
+									</p>
+
+									<h4>5. CI/CD ― GitHub Actions（OIDC認証）</h4>
+									<p>
+										フロントエンドは<code>frontend/</code>配下の変更をトリガーにS3同期とCloudFrontキャッシュ削除を自動実行。
+										バックエンドはGoのビルド・テスト後にDockerイメージをECRへプッシュ。
+										AWS認証はOIDCによるシークレットレス認証を採用予定で、現在移行作業中です。
+									</p>
+
+									<h3 class="major" style="margin-top: 2em;">使用技術スタック</h3>
+
+									<div class="table-wrapper">
+										<table>
+											<thead>
+												<tr>
+													<th>カテゴリ</th>
+													<th>技術・サービス</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr><td>CDN・静的配信</td><td>Amazon CloudFront, Amazon S3</td></tr>
+												<tr><td>DNS・SSL</td><td>Amazon Route 53, AWS Certificate Manager</td></tr>
+												<tr><td>サーバーレスAPI</td><td>Amazon API Gateway (HTTP API), AWS Lambda (Python 3.12)</td></tr>
+												<tr><td>メール</td><td>Amazon SES</td></tr>
+												<tr><td>コンテナ</td><td>Amazon ECR, Docker (マルチステージビルド)</td></tr>
+												<tr><td>IaC</td><td>Terraform (マルチプロバイダ・クロスアカウント)</td></tr>
+												<tr><td>CI/CD</td><td>GitHub Actions (OIDC認証)</td></tr>
+												<tr><td>バックエンド言語</td><td>Go, Python 3</td></tr>
+												<tr><td>フロントエンド</td><td>HTML5, CSS3, JavaScript</td></tr>
+											</tbody>
+										</table>
+									</div>
+
+									<ul class="actions" style="margin-top: 2em;">
+										<li><a href="https://github.com/makotonic999/aws-serverless-corporate-site" class="button" target="_blank">GitHubリポジトリを見る</a></li>
+										<li><a href="index.html" class="button">Homeに戻る</a></li>
+									</ul>
 
 								</div>
 							</div>
@@ -87,7 +154,7 @@
 					<section id="footer">
 						<div class="inner">
 							<ul class="copyright">
-								<li>&copy; 岡田築炉工業所 All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+								<li>&copy; Okada Makoto All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
 							</ul>
 						</div>
 					</section>
