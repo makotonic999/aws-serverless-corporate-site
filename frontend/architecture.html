@@ -1,67 +1,72 @@
-<!DOCTYPE HTML>
-<!--
-	Solid State by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-		<title>システム構成 | Okada Makoto Portfolio</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="css/main.css" />
-		<noscript><link rel="stylesheet" href="css/noscript.css" /></noscript>
-	</head>
-	<body class="is-preload">
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Architecture | Okada Makoto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            github: {
+              bg: '#0d1117',
+              surface: '#161b22',
+              border: '#30363d',
+              text: '#e6edf3',
+              muted: '#8b949e',
+              blue: '#1f6feb',
+              'blue-hover': '#388bfd',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Noto Sans JP', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-github-bg text-github-text font-sans">
 
-		<!-- Page Wrapper -->
-			<div id="page-wrapper">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-github-surface border-b border-github-border">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="font-bold text-lg text-github-text hover:text-github-blue-hover transition-colors">Okada Makoto</a>
+      <nav class="flex gap-6 text-sm text-github-muted">
+        <a href="index.html#about" class="hover:text-github-text transition-colors">About</a>
+        <a href="index.html#skills" class="hover:text-github-text transition-colors">Skills</a>
+        <a href="index.html#works" class="hover:text-github-text transition-colors">Works</a>
+        <a href="architecture.html" class="text-github-text transition-colors">Architecture</a>
+        <a href="index.html#contact" class="hover:text-github-text transition-colors">Contact</a>
+      </nav>
+    </div>
+  </header>
 
-				<!-- Header -->
-					<header id="header">
-						<h1><a href="index.html">Okada Makoto</a></h1>
-						<nav>
-							<a href="#menu">Menu</a>
-						</nav>
-					</header>
+  <!-- Hero -->
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <p class="text-github-muted text-sm mb-2">Works / aws-serverless-corporate-site</p>
+    <h1 class="text-4xl font-bold mb-4">システムアーキテクチャ</h1>
+    <p class="text-github-muted max-w-2xl leading-relaxed">
+      本サイトはレンタルサーバーや常時稼働インスタンスを一切使用せず、AWSのサーバーレス・マネージドサービスのみで構成しています。
+      <strong class="text-github-text">年間コスト約1,500円</strong>での運用を実現しながら、高パフォーマンス・高セキュリティを両立しています。
+    </p>
+  </section>
 
-				<!-- Menu -->
-					<nav id="menu">
-						<div class="inner">
-							<h2>Menu</h2>
-							<ul class="links">
-								<li><a href="index.html">Home</a></li>
-								<li><a href="architecture.html">システム構成（AWS/IaC）</a></li>
-								<li><a href="index.html#footer">お問い合わせ</a></li>
-							</ul>
-							<a href="#" class="close">Close</a>
-						</div>
-					</nav>
+  <div class="border-t border-github-border"></div>
 
-				<!-- Wrapper -->
-					<section id="wrapper">
-						<header>
-							<div class="inner">
-								<h2>システムアーキテクチャ</h2>
-								<p>このポートフォリオサイトを支えるAWSサーバーレス構成とIaCの取り組み</p>
-							</div>
-						</header>
-
-						<!-- Content -->
-							<div class="wrapper">
-								<div class="inner">
-
-									<h3 class="major">構成概要</h3>
-									<p>
-										本サイトはレンタルサーバーや常時稼働インスタンスを一切使用せず、AWSのサーバーレス・マネージドサービスのみで構成しています。
-										<strong>年間コスト約1,500円</strong>での運用を実現しながら、高パフォーマンス・高セキュリティを両立しています。
-									</p>
-
-<script type="module">
-									import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-									mermaid.initialize({ startOnLoad: true, theme: 'dark' });
-								</script>
-								<div class="mermaid">
+  <!-- Diagram -->
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <h2 class="text-xl font-bold mb-6">構成図</h2>
+    <div class="bg-github-surface border border-github-border rounded-lg p-6">
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+      <div class="mermaid">
 flowchart TD
     User(["👤 ユーザー / ブラウザ"])
     Route53["🌐 Amazon Route 53"]
@@ -71,7 +76,7 @@ flowchart TD
     APIGW["🚪 API Gateway"]
     Lambda["⚡ Lambda\nPython 3.12"]
     SES["✉️ Amazon SES"]
-    Admin["👨‍💻 管理者"]
+    Admin["👨💻 管理者"]
     ECR[("🐳 Amazon ECR")]
     GHA["🔄 GitHub Actions\nOIDC認証"]
 
@@ -85,95 +90,104 @@ flowchart TD
     SES --> Admin
     GHA -->|S3同期 + CF無効化| S3
     GHA -->|Dockerイメージ| ECR
-								</div>
+      </div>
+    </div>
+  </section>
 
-									<h3 class="major" style="margin-top: 2em;">設計のポイント</h3>
+  <div class="border-t border-github-border"></div>
 
-									<h4>1. 静的配信層 ― S3 + CloudFront + OAC</h4>
-									<p>
-										S3バケットはパブリックアクセスを完全遮断し、CloudFrontからのアクセスのみをOAC（Origin Access Control）で許可する構成を採用。
-										CloudFrontのエッジキャッシュにより世界中から高速アクセスが可能で、S3への直接アクセスを排除することでセキュリティを強化しています。
-									</p>
+  <!-- Design Points -->
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <h2 class="text-xl font-bold mb-6">設計のポイント</h2>
+    <div class="flex flex-col gap-4">
 
-									<h4>2. ドメイン・SSL/TLS ― Route 53 + ACM（クロスアカウント構成）</h4>
-									<p>
-										Route 53のホストゾーンは別AWSアカウントで管理しており、Terraformの<code>assume_role</code>を使ったクロスアカウント構成でDNSレコードを自動作成しています。
-										ACM証明書はCloudFront要件に合わせus-east-1で発行し、DNS検証も自動化しています。
-									</p>
+      <div class="bg-github-surface border border-github-border rounded-lg p-6">
+        <h3 class="font-semibold mb-2">1. 静的配信層 ― S3 + CloudFront + OAC</h3>
+        <p class="text-sm text-github-muted leading-relaxed">
+          S3バケットはパブリックアクセスを完全遮断し、CloudFrontからのアクセスのみをOAC（Origin Access Control）で許可。
+          CloudFrontのエッジキャッシュにより世界中から高速アクセスが可能で、S3への直接アクセスを排除することでセキュリティを強化しています。
+        </p>
+      </div>
 
-									<h4>3. サーバーレスAPI ― API Gateway + Lambda + SES</h4>
-									<p>
-										お問い合わせフォームのバックエンドはAPI Gateway（HTTP API）+ Lambda（Python 3.12）+ SESで構成。
-										サーバーの常時稼働が不要なため、リクエスト発生時のみ課金される極めて低コストな運用を実現しています。
-										CORS設定はAPI Gateway側で一元管理しています。
-									</p>
+      <div class="bg-github-surface border border-github-border rounded-lg p-6">
+        <h3 class="font-semibold mb-2">2. ドメイン・SSL/TLS ― Route 53 + ACM（クロスアカウント構成）</h3>
+        <p class="text-sm text-github-muted leading-relaxed">
+          Route 53のホストゾーンは別AWSアカウントで管理しており、Terraformの<code class="text-github-text bg-github-bg px-1 rounded">assume_role</code>を使ったクロスアカウント構成でDNSレコードを自動作成。
+          ACM証明書はCloudFront要件に合わせus-east-1で発行し、DNS検証も自動化しています。
+        </p>
+      </div>
 
-									<h4>4. IaC ― Terraform（マルチプロバイダ・リモートステート）</h4>
-									<p>
-										全リソース（S3・CloudFront・Route 53・ACM・API Gateway・Lambda・SES・IAM・ECR・DynamoDB）をTerraformで定義。
-										ステートファイルはS3に保存し、DynamoDBによる排他ロックでチーム開発にも対応できる構成にしています。
-										PITRも有効化しステートの保護を徹底しています。
-									</p>
+      <div class="bg-github-surface border border-github-border rounded-lg p-6">
+        <h3 class="font-semibold mb-2">3. サーバーレスAPI ― API Gateway + Lambda + SES</h3>
+        <p class="text-sm text-github-muted leading-relaxed">
+          お問い合わせフォームのバックエンドはAPI Gateway（HTTP API）+ Lambda（Python 3.12）+ SESで構成。
+          サーバーの常時稼働が不要なため、リクエスト発生時のみ課金される極めて低コストな運用を実現しています。
+        </p>
+      </div>
 
-									<h4>5. CI/CD ― GitHub Actions（OIDC認証）</h4>
-									<p>
-										フロントエンドは<code>frontend/</code>配下の変更をトリガーにS3同期とCloudFrontキャッシュ削除を自動実行。
-										バックエンドはGoのビルド・テスト後にDockerイメージをECRへプッシュ。
-										AWS認証はOIDCによるシークレットレス認証を採用し、アクセスキーを一切使用しない構成を実現しています。
-									</p>
+      <div class="bg-github-surface border border-github-border rounded-lg p-6">
+        <h3 class="font-semibold mb-2">4. IaC ― Terraform（マルチプロバイダ・リモートステート）</h3>
+        <p class="text-sm text-github-muted leading-relaxed">
+          全リソース（S3・CloudFront・Route 53・ACM・API Gateway・Lambda・SES・IAM・ECR・DynamoDB・CloudWatch）をTerraformで定義。
+          ステートファイルはS3に保存し、DynamoDBによる排他ロックとPITRでステートを保護しています。
+        </p>
+      </div>
 
-									<h3 class="major" style="margin-top: 2em;">使用技術スタック</h3>
+      <div class="bg-github-surface border border-github-border rounded-lg p-6">
+        <h3 class="font-semibold mb-2">5. CI/CD ― GitHub Actions（OIDC認証）</h3>
+        <p class="text-sm text-github-muted leading-relaxed">
+          フロントエンドは<code class="text-github-text bg-github-bg px-1 rounded">frontend/</code>配下の変更をトリガーにS3同期とCloudFrontキャッシュ削除を自動実行。
+          バックエンドはGoのビルド・テスト後にDockerイメージをECRへプッシュ。
+          AWS認証はOIDCによるシークレットレス認証を採用しています。
+        </p>
+      </div>
 
-									<div class="table-wrapper">
-										<table>
-											<thead>
-												<tr>
-													<th>カテゴリ</th>
-													<th>技術・サービス</th>
-												</tr>
-											</thead>
-											<tbody>
-												<tr><td>CDN・静的配信</td><td>Amazon CloudFront, Amazon S3</td></tr>
-												<tr><td>DNS・SSL</td><td>Amazon Route 53, AWS Certificate Manager</td></tr>
-												<tr><td>サーバーレスAPI</td><td>Amazon API Gateway (HTTP API), AWS Lambda (Python 3.12)</td></tr>
-												<tr><td>メール</td><td>Amazon SES</td></tr>
-												<tr><td>コンテナ</td><td>Amazon ECR, Docker (マルチステージビルド)</td></tr>
-												<tr><td>IaC</td><td>Terraform (マルチプロバイダ・クロスアカウント)</td></tr>
-												<tr><td>CI/CD</td><td>GitHub Actions (OIDC認証)</td></tr>
-												<tr><td>バックエンド言語</td><td>Go, Python 3</td></tr>
-												<tr><td>フロントエンド</td><td>HTML5, CSS3, JavaScript</td></tr>
-											</tbody>
-										</table>
-									</div>
+    </div>
+  </section>
 
-									<ul class="actions" style="margin-top: 2em;">
-										<li><a href="https://github.com/makotonic999/aws-serverless-corporate-site" class="button" target="_blank">GitHubリポジトリを見る</a></li>
-										<li><a href="index.html" class="button">Homeに戻る</a></li>
-									</ul>
+  <div class="border-t border-github-border"></div>
 
-								</div>
-							</div>
+  <!-- Tech Stack -->
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <h2 class="text-xl font-bold mb-6">使用技術スタック</h2>
+    <div class="bg-github-surface border border-github-border rounded-lg overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-github-border">
+            <th class="text-left px-6 py-3 text-github-muted font-medium">カテゴリ</th>
+            <th class="text-left px-6 py-3 text-github-muted font-medium">技術・サービス</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-github-border">
+          <tr><td class="px-6 py-3 text-github-muted">CDN・静的配信</td><td class="px-6 py-3">Amazon CloudFront, Amazon S3</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">DNS・SSL</td><td class="px-6 py-3">Amazon Route 53, AWS Certificate Manager</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">サーバーレスAPI</td><td class="px-6 py-3">Amazon API Gateway (HTTP API), AWS Lambda (Python 3.12)</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">メール</td><td class="px-6 py-3">Amazon SES</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">監視</td><td class="px-6 py-3">Amazon CloudWatch, Amazon SNS</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">コンテナ</td><td class="px-6 py-3">Amazon ECR, Docker (マルチステージビルド)</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">IaC</td><td class="px-6 py-3">Terraform (マルチプロバイダ・クロスアカウント)</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">CI/CD</td><td class="px-6 py-3">GitHub Actions (OIDC認証)</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">バックエンド</td><td class="px-6 py-3">Go, Python 3</td></tr>
+          <tr><td class="px-6 py-3 text-github-muted">フロントエンド</td><td class="px-6 py-3">HTML5, Tailwind CSS, JavaScript</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-					</section>
+    <div class="flex gap-4 mt-8">
+      <a href="https://github.com/makotonic999/aws-serverless-corporate-site" target="_blank"
+        class="px-5 py-2 bg-github-blue hover:bg-github-blue-hover text-white text-sm rounded-md transition-colors">GitHubで見る</a>
+      <a href="index.html"
+        class="px-5 py-2 bg-github-surface hover:bg-github-border text-github-text text-sm rounded-md border border-github-border transition-colors">Homeに戻る</a>
+    </div>
+  </section>
 
-				<!-- Footer -->
-					<section id="footer">
-						<div class="inner">
-							<ul class="copyright">
-								<li>&copy; Okada Makoto All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-							</ul>
-						</div>
-					</section>
+  <!-- Footer -->
+  <footer class="border-t border-github-border">
+    <div class="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-github-muted">
+      <span>&copy; Okada Makoto. All rights reserved.</span>
+      <a href="https://github.com/makotonic999" target="_blank" class="hover:text-github-text transition-colors">github.com/makotonic999</a>
+    </div>
+  </footer>
 
-			</div>
-
-		<!-- Scripts -->
-			<script src="js/jquery.min.js"></script>
-			<script src="js/jquery.scrollex.min.js"></script>
-			<script src="js/browser.min.js"></script>
-			<script src="js/breakpoints.min.js"></script>
-			<script src="js/util.js"></script>
-			<script src="js/main.js"></script>
-
-	</body>
+</body>
 </html>
