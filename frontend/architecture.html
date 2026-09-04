@@ -57,29 +57,35 @@
 										<strong>年間コスト約1,500円</strong>での運用を実現しながら、高パフォーマンス・高セキュリティを両立しています。
 									</p>
 
-<pre><code>[ ユーザー (ブラウザ) ]
-       │
-       ▼ HTTPS
-[ Route 53 ] ──── [ ACM (SSL/TLS証明書) ]
-       │
-       ▼
-[ CloudFront (CDN・エッジキャッシュ) ]
-       │
-       ├─► [ S3 ] 静的コンテンツ配信 (OAC経由のみ許可)
-       │
-       └─► [ API Gateway (HTTP API) ]
-                   │
-                   ▼
-             [ Lambda (Python 3.12) ]
-                   │
-                   ▼
-             [ SES ] ──► 管理者へメール通知
+<script type="module">
+									import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+									mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+								</script>
+								<div class="mermaid">
+flowchart TD
+    User(["👤 ユーザー / ブラウザ"])
+    Route53["🌐 Amazon Route 53"]
+    ACM["🔒 ACM"]
+    CloudFront["⚡ Amazon CloudFront"]
+    S3[("🪣 Amazon S3")]
+    APIGW["🚪 API Gateway"]
+    Lambda["⚡ Lambda\nPython 3.12"]
+    SES["✉️ Amazon SES"]
+    Admin["👨‍💻 管理者"]
+    ECR[("🐳 Amazon ECR")]
+    GHA["🔄 GitHub Actions\nOIDC認証"]
 
-[ GitHub Actions ]
-       ├─► S3同期 + CloudFrontキャッシュ削除 (フロントエンド)
-       └─► ECRへDockerイメージプッシュ (バックエンド)
-
-すべてのリソースを Terraform (IaC) で管理</code></pre>
+    User -->|HTTPS| Route53
+    Route53 -.->|DNS検証| ACM
+    Route53 --> CloudFront
+    CloudFront -->|OAC| S3
+    User -->|フォーム送信| APIGW
+    APIGW --> Lambda
+    Lambda --> SES
+    SES --> Admin
+    GHA -->|S3同期 + CF無効化| S3
+    GHA -->|Dockerイメージ| ECR
+								</div>
 
 									<h3 class="major" style="margin-top: 2em;">設計のポイント</h3>
 
@@ -113,7 +119,7 @@
 									<p>
 										フロントエンドは<code>frontend/</code>配下の変更をトリガーにS3同期とCloudFrontキャッシュ削除を自動実行。
 										バックエンドはGoのビルド・テスト後にDockerイメージをECRへプッシュ。
-										AWS認証はOIDCによるシークレットレス認証を採用予定で、現在移行作業中です。
+										AWS認証はOIDCによるシークレットレス認証を採用し、アクセスキーを一切使用しない構成を実現しています。
 									</p>
 
 									<h3 class="major" style="margin-top: 2em;">使用技術スタック</h3>
