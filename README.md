@@ -1,8 +1,10 @@
-# AWS Serverless Corporate Site
+# AWS Serverless Portfolio Site
 
-AWSの静的ホスティングおよびサーバレスアーキテクチャを活用して構築した、架空企業（岡田築炉工業所）のコーポレートサイトプロジェクトです。
+AWSのサーバーレスアーキテクチャを活用して構築した、インフラエンジニア（岡田誠）の個人ポートフォリオサイトです。
 
-インフラエンジニアとしての強みである **「高パフォーマンス」「極限のコスト最適化」「IaC（Infrastructure as Code）による環境管理」** を実証・アピールするためのポートフォリオ兼Web基盤テンプレートとして開発されています。
+インフラエンジニアとしての強みである **「高パフォーマンス」「極限のコスト最適化」「IaC（Infrastructure as Code）による環境管理」** を実証・アピールするためのポートフォリオ兼Web基盤テンプレートとして開発しています。
+
+🌐 **サイトURL**: [okada-chikuro-kougyousyo.com](https://okada-chikuro-kougyousyo.com)
 
 ---
 
@@ -10,18 +12,20 @@ AWSの静的ホスティングおよびサーバレスアーキテクチャを�
 
 - **極限のコスト最適化**
   - レンタルサーバーや常時稼働インスタンスを使用せず、S3 + CloudFront による静的配信とサーバレスAPI（API Gateway + Lambda）を採用。
-  - アクセス量に応じた完全従量課金設計により、年間1,500円前後の低コスト運用を実現。
+  - アクセス量に応じた完全従量課金設計により、年間約1,500円の低コスト運用を実現。
 - **高パフォーマンス & 高セキュリティ**
   - CloudFront（CDN）によるエッジキャッシュ配信と Route 53 + ACM による自動HTTPS化。
   - S3バケットはパブリックアクセスを完全遮断し、OAC（Origin Access Control）経由のみ許可。
-  - サーバーレス構成のためOS/ミドルウェアの保守作業が不要で、OSレベルの脆弱性リスクを排除。
+  - サーバーレス構成のためOSレベルの脆弱性リスクを排除。
 - **完全にコード化されたインフラ（IaC）**
-  - リソース全体（S3, CloudFront, Route 53, ACM, API Gateway, Lambda, SES, ECR, IAM等）を **Terraform** で定義。
-  - S3リモートステート + DynamoDBロックによるチーム開発対応のステート管理。
-  - 環境構築・変更・削除を再現性高くスピーディに実行可能。
+  - 全リソース（S3, CloudFront, Route 53, ACM, API Gateway, Lambda, SES, ECR, IAM, CloudWatch, SNS等）を **Terraform** で定義。
+  - S3ネイティブロック（`use_lockfile = true`）によるステート管理。
+  - マルチプロバイダ・クロスアカウント構成（Route 53管理アカウントへの `assume_role`）。
 - **CI/CD パイプライン**
   - GitHub Actions による自動デプロイ（フロントエンド: S3同期 + CloudFrontキャッシュ削除、バックエンド: ECRへのDockerイメージプッシュ）。
   - OIDC認証によるシークレットレスなAWS認証を採用。
+- **監視・アラート**
+  - CloudWatch + SNS によるLambdaエラー・API Gateway 5xxエラーの自動通知。
 
 ---
 
@@ -29,63 +33,40 @@ AWSの静的ホスティングおよびサーバレスアーキテクチャを�
 
 ```mermaid
 flowchart TD
-    User(["👤 エンドユーザー / ブラウザ"])
+    User(["👤 ユーザー / ブラウザ"])
     Route53["🌐 Amazon Route 53"]
-    ACM["🔒 AWS Certificate Manager"]
+    ACM["🔒 ACM"]
     CloudFront["⚡ Amazon CloudFront"]
-    S3[("🪣 Amazon S3\n静的コンテンツ")]
-    APIGW["🚪 Amazon API Gateway\n(HTTP API)"]
-    Lambda["⚡ AWS Lambda\n(Python 3.12)"]
+    S3[("🪣 Amazon S3")]
+    APIGW["🚪 API Gateway\n(HTTP API)"]
+    Lambda["⚡ Lambda\nPython 3.12"]
     SES["✉️ Amazon SES"]
-    Admin["👨💻 管理者 (メール受信)"]
+    Admin["👨💻 管理者"]
     ECR[("🐳 Amazon ECR")]
-    GHA["🔄 GitHub Actions"]
+    GHA["🔄 GitHub Actions\nOIDC認証"]
+    CW["📊 CloudWatch\n+ SNS"]
 
-    User -->|① HTTPSリクエスト| Route53
-    Route53 -.->|ドメイン検証| ACM
+    User -->|HTTPS| Route53
+    Route53 -.->|DNS検証| ACM
     Route53 --> CloudFront
-    CloudFront -->|OACアクセス| S3
-
-    User -->|② フォーム送信| APIGW
-    APIGW -->|③ リクエスト実行| Lambda
-    Lambda -->|④ メール送信依頼| SES
-    SES -->|⑤ 問い合わせ通知| Admin
-
-    GHA -->|フロントエンドデプロイ| S3
-    GHA -->|Dockerイメージプッシュ| ECR
-
-    linkStyle default stroke:#fff,stroke-width:2px;
-
-    style S3 fill:#1E3A8A,stroke:#38BDF8,stroke-width:2px,color:#fff
-    style CloudFront fill:#78350F,stroke:#FBBF24,stroke-width:2px,color:#fff
-    style Lambda fill:#7C2D12,stroke:#FB923C,stroke-width:2px,color:#fff
+    CloudFront -->|OAC| S3
+    User -->|フォーム送信| APIGW
+    APIGW --> Lambda
+    Lambda --> SES
+    SES --> Admin
+    Lambda -.->|エラー通知| CW
+    APIGW -.->|5xxエラー通知| CW
+    CW --> Admin
+    GHA -->|S3同期 + CF無効化| S3
+    GHA -->|Dockerイメージ| ECR
 ```
-
-### コンポーネント役割と構成のポイント
-
-- **静的コンテンツ配信層（S3 + CloudFront）**
-  - S3バケットはパブリックアクセスを完全遮断し、CloudFrontからのアクセスのみをOACで許可。
-  - CloudFront（CDN）で世界中のエッジサーバーにキャッシュさせることで、表示速度の高速化とS3転送量の削減を両立。
-
-- **ドメイン・SSL/TLSセキュリティ層（Route 53 + ACM）**
-  - Route 53 で独自ドメインのDNS設定を管理（クロスアカウント構成）。
-  - ACM（AWS Certificate Manager）で無料発行・自動更新されるSSL/TLS証明書を適用し、サイト全体を完全HTTPS化。
-
-- **完全サーバレスなお問い合わせAPI（API Gateway + Lambda + SES）**
-  - フォームからの送信リクエストをAPI Gateway（HTTP API）で受領し、CORS制御を実施。
-  - Lambda関数（Python 3.12）が起動してロジックを処理し、Amazon SESを介して管理者へメールを自動通知。
-  - サーバーの常時稼働が不要なため、実行時間（数秒）に応じた極めて低い従量課金コストで運用。
-
-- **バックエンドコンテナ（Go + ECR）**
-  - Go製のAPIサーバーをDockerコンテナ化し、Amazon ECRで管理。
-  - マルチステージビルドにより軽量な本番イメージを生成。
 
 ---
 
 ## ディレクトリ構成
 
 ```
-aws-serverless-corporate-site/
+portfolio/
 ├── .github/
 │   └── workflows/
 │       ├── backend-ci.yml        # バックエンドCI/CD（ECRへのDockerイメージプッシュ）
@@ -101,19 +82,19 @@ aws-serverless-corporate-site/
 │   ├── images/
 │   ├── js/
 │   ├── webfonts/
-│   ├── index.html                # メインページ（お問い合わせフォーム含む）
+│   ├── index.html                # ポートフォリオメインページ（About / Skills / Works / Contact）
 │   └── architecture.html         # システム構成紹介ページ
 ├── terraform/
-│   ├── environments/
-│   │   └── dev/                  # dev環境の全Terraformリソース定義
-│   │       ├── backend.tf        # S3リモートステート設定
-│   │       ├── backend_resources.tf  # ステート用S3・DynamoDB・ECRリポジトリ
-│   │       ├── iam_github_actions.tf # GitHub Actions OIDC用IAMロール
-│   │       ├── main.tf           # メインリソース（S3/CloudFront/Route53/ACM/Lambda/API GW/SES）
-│   │       ├── outputs.tf
-│   │       ├── provider.tf       # マルチプロバイダ設定（東京/us-east-1/クロスアカウント）
-│   │       └── variables.tf
-│   └── iam_github_actions.tf     # ルートレベルのIAMロール定義（旧構成）
+│   └── environments/
+│       └── dev/
+│           ├── backend.tf            # S3リモートステート設定
+│           ├── backend_resources.tf  # ステート用S3・DynamoDB・ECRリポジトリ
+│           ├── cloudwatch.tf         # CloudWatch アラーム・SNS通知
+│           ├── iam_github_actions.tf # GitHub Actions OIDC用IAMロール（フロント・バック）
+│           ├── main.tf               # メインリソース（S3/CloudFront/Route53/ACM/Lambda/API GW/SES）
+│           ├── outputs.tf
+│           ├── provider.tf           # マルチプロバイダ設定（東京/us-east-1/クロスアカウント）
+│           └── variables.tf
 └── README.md
 ```
 
@@ -133,8 +114,9 @@ aws-serverless-corporate-site/
 | `aws_apigatewayv2_api` | HTTP API（CORS設定済み） |
 | `aws_lambda_function` | お問い合わせフォーム処理（Python 3.12） |
 | `aws_ses_email_identity` | SES送信元メールアドレス検証 |
-| `aws_iam_role` | Lambda実行ロール / GitHub Actions OIDCロール |
-| `aws_dynamodb_table` | Terraformステートロック用 |
+| `aws_iam_role` | Lambda実行ロール / GitHub Actions OIDCロール（フロント・バック） |
+| `aws_cloudwatch_metric_alarm` | Lambdaエラー・API Gateway 5xxエラー監視 |
+| `aws_sns_topic` | CloudWatchアラームのメール通知先 |
 | `aws_ecr_repository` | バックエンドDockerイメージ管理 |
 | `aws_iam_openid_connect_provider` | GitHub Actions OIDC認証 |
 
@@ -154,7 +136,7 @@ provider "aws" { alias = "management"; assume_role { role_arn = "..." } }
 ### Terraformステート管理
 
 - ステートファイル: `s3://okadachikuro-dev-tfstate/dev/terraform.tfstate`
-- ロック: DynamoDB テーブル `terraform-locks-dev`
+- ロック: S3ネイティブロック（`use_lockfile = true`）
 
 ---
 
@@ -164,17 +146,19 @@ provider "aws" { alias = "management"; assume_role { role_arn = "..." } }
 
 `frontend/` 配下の変更を `main` ブランチにプッシュすると自動実行。
 
-1. S3バケットへファイル同期（`aws s3 sync`）
-2. CloudFrontキャッシュ削除（`create-invalidation`）
+1. OIDC認証でAWSに接続（`AWS_FRONTEND_ROLE_ARN`）
+2. S3バケットへファイル同期（`aws s3 sync`）
+3. CloudFrontキャッシュ削除（`create-invalidation`）
 
 ### バックエンド（`backend-ci.yml`）
 
 `backend/` 配下の変更を `main` ブランチにプッシュすると自動実行。
 
 1. Goのビルド・テスト
-2. DockerイメージをビルドしてECRへプッシュ
+2. OIDC認証でAWSに接続（`AWS_BACKEND_ROLE_ARN`）
+3. DockerイメージをビルドしてECRへプッシュ
 
-> 両ワークフローともAWS認証はOIDC（シークレットレス）を採用予定。現在は `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` シークレットを使用。
+> 両ワークフローともOIDC認証（シークレットレス）を採用。
 
 ---
 
@@ -193,7 +177,7 @@ provider "aws" { alias = "management"; assume_role { role_arn = "..." } }
 cd terraform/environments/dev
 # backend.tf の backend "s3" ブロックをコメントアウトした状態で実行
 terraform init
-terraform apply -target=aws_s3_bucket.tf_state -target=aws_dynamodb_table.tf_locks
+terraform apply -target=aws_s3_bucket.tf_state
 
 # 2. backend.tf のコメントアウトを外してステートをS3に移行
 terraform init -migrate-state
