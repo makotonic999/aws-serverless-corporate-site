@@ -25,7 +25,7 @@ resource "aws_iam_role" "github_actions_backend_deploy" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:makotonic999*aws-serverless-corporate-site*:*"
+            "token.actions.githubusercontent.com:sub" = "repo:makotonic999*portfolio*:*"
           }
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
@@ -82,7 +82,7 @@ resource "aws_iam_role" "github_actions_deploy" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:makotonic999*aws-serverless-corporate-site*:*"
+            "token.actions.githubusercontent.com:sub" = "repo:makotonic999*portfolio*:*"
           }
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
